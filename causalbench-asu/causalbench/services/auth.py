@@ -1,7 +1,6 @@
 import os
 import sys
 from datetime import datetime, timezone
-from getpass import getpass
 from pathlib import Path
 
 import jwt
@@ -9,6 +8,7 @@ import requests
 import yaml
 
 from causalbench.commons.utils import causal_bench_path, causalbench_version
+from causalbench.commons.password import prompt_password
 from requests import RequestException
 
 __access_token = None
@@ -106,10 +106,8 @@ def authenticate(config) -> str | None:
 def create_config(config_path: str):
     Path(config_path).parent.mkdir(parents=True, exist_ok=True)
 
-    input_pass = getpass if sys.stdin.isatty() else input
-
     email: str = input('Email: ')
-    password: str = input_pass('Password: ')
+    password: str = prompt_password('Password: ')
     print()
 
     with open(config_path, 'w') as file:
