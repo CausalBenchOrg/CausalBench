@@ -58,7 +58,7 @@ for Causal-Learning Benchmarking for Efficacy, Reproducibility, and Scientific
 Collaboration".
 
 ## Support Benchmark Context
-CausalBench is structured to support different machine learning tasks and dataset types. With user contribution, the supported context will be expanded, currently, these models and tasks are provided.    
+CausalBench is structured to support different machine learning tasks and dataset types. With user contribution, the supported context will be expanded, currently (as of 8/12/25), these models and tasks are provided.    
 
 | Dataset               | File                 | Description                                                                                                                                           |
 |-----------------------|----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
