@@ -6,20 +6,20 @@ import requests
 from requests import JSONDecodeError as RequestsJSONDecodeError
 from bunch_py3 import bunchify
 
-from causalbench import access_token
+from causalbench.services.auth import get_access_token
 
 
 def save_module(module_type, module_id, version, public, input_file, api_base, default_output_file):
     visibility = "public" if public else "private"
     if module_id is None:
-        url = f'https://www.causalbench.org/api/{api_base}/upload?visibility={visibility}'
+        url = f'https://causalbench.org/api/{api_base}/upload?visibility={visibility}'
     elif version is None:
-        url = f'https://www.causalbench.org/api/{api_base}/upload/{module_id}?visibility={visibility}'
+        url = f'https://causalbench.org/api/{api_base}/upload/{module_id}?visibility={visibility}'
     else:
-        url = f'https://www.causalbench.org/api/{api_base}/upload/{module_id}/{version}?visibility={visibility}'
+        url = f'https://causalbench.org/api/{api_base}/upload/{module_id}/{version}?visibility={visibility}'
 
     headers = {
-        'Authorization': f'Bearer {access_token}'
+        'Authorization': f'Bearer {get_access_token()}'
     }
     files = {
         'file': (default_output_file, open(input_file, 'rb'), 'application/zip')
@@ -53,9 +53,9 @@ def save_module(module_type, module_id, version, public, input_file, api_base, d
 
 
 def fetch_module(module_type, module_id, version, base_api, default_output_file):
-    url = f'https://www.causalbench.org/api/{base_api}/download/{module_id}/{version}'
+    url = f'https://causalbench.org/api/{base_api}/download/{module_id}/{version}'
     headers = {
-        'Authorization': f'Bearer {access_token}'
+        'Authorization': f'Bearer {get_access_token()}'
     }
 
     response = requests.get(url, headers=headers)

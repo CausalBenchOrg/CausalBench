@@ -1,47 +1,31 @@
 import os
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
+import jwt
 import requests
 import yaml
 
-from causalbench.commons.utils import causal_bench_path
+from causalbench.commons.utils import causal_bench_path, causalbench_version
+from causalbench.commons.password import prompt_password
+from requests import RequestException
+
+__access_token = None
+
+def get_access_token() -> str | None:
+    global __access_token
+    if __access_token is None or is_token_expired(__access_token):
+        __access_token = init_auth()
+    return __access_token
 
 
-def authenticate(config) -> str | None:
-    login_url = "https://www.causalbench.org/api/authenticate/login"
-
-    if 'email' in config:
-        email = config['email']
-    else:
-        return
-
-    if 'password' in config:
-        password = config['password']
-    else:
-        return
-
-    # Payload for login request
-    payload = {
-        'email_id': email,
-        'password': password
-    }
-
-    try:
-        # Sending login request
-        response = requests.post(login_url, json=payload)
-        response.raise_for_status()  # Raise an exception for HTTP errors
-        data = response.json()['data']
-
-        if data is not None:
-            return data['access_token']
-
-    except requests.exceptions.RequestException as e:
-        print(f'Error occurred: {e}', file=sys.stderr)
-        sys.exit(1)
+def is_token_expired(token):
+    exp_timestamp = jwt.decode(token, options={"verify_signature": False})["exp"]
+    return datetime.now(timezone.utc).timestamp() >= exp_timestamp
 
 
-def init_auth():
+def init_auth() -> str | None:
     # load config from file
     config_path = causal_bench_path('config.yaml')
 
@@ -67,11 +51,63 @@ def init_auth():
         create_config(config_path)
 
 
+def authenticate(config) -> str | None:
+    login_url = "https://causalbench.org/api/authenticate/login"
+
+    if 'email' in config:
+        email = config['email']
+    else:
+        return None
+
+    if 'password' in config:
+        password = config['password']
+    else:
+        return None
+
+    cb_ver = causalbench_version()
+
+    # Payload for login request
+    payload = {
+        'email_id': email,
+        'password': password,
+        'python_package_version': f'{cb_ver.major}.{cb_ver.minor}'
+    }
+
+    try:
+        # Sending login request
+        response = requests.post(login_url, json=payload)
+
+        # Successful login
+        if response.status_code == 200:
+            data = response.json()['data']
+            if data is not None:
+                return data['access_token']
+            return None
+
+        # Invalid credentials
+        if response.status_code == 401:
+            return None
+
+        # Potential version mismatch
+        if response.status_code == 403:
+            message = response.json()['message']
+            if message is not None:
+                print(message, file=sys.stderr)
+                sys.exit(1)
+
+        # Raise an exception for HTTP errors
+        response.raise_for_status()
+
+    except RequestException as e:
+        print(f'Error occurred: {e}', file=sys.stderr)
+        sys.exit(1)
+
+
 def create_config(config_path: str):
     Path(config_path).parent.mkdir(parents=True, exist_ok=True)
 
-    email: str = input('email: ')
-    password: str = input('password: ')
+    email: str = input('Email: ')
+    password: str = prompt_password('Password: ')
     print()
 
     with open(config_path, 'w') as file:

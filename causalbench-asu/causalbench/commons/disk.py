@@ -36,7 +36,7 @@ class Disks:
         physical_drives = Bunch()
 
         for drive in c.Win32_DiskDrive():
-            drive_id = drive.DeviceID.strip("\\\\.\\").replace("PHYSICALDRIVE", "PhysicalDrive")
+            drive_id = drive.DeviceID.strip('\\\\.\\').replace('PHYSICALDRIVE', 'PhysicalDrive')
 
             physical_drives[drive_id] = Bunch()
 
@@ -51,8 +51,7 @@ class Disks:
                     physical_drives[drive_id].usage.total += int(partition.Size)
                     physical_drives[drive_id].usage.free += int(partition.FreeSpace)
 
-            physical_drives[drive_id].usage.used = physical_drives[drive_id].usage.total - physical_drives[
-                drive_id].usage.free
+            physical_drives[drive_id].usage.used = physical_drives[drive_id].usage.total - physical_drives[drive_id].usage.free
 
             result = self._syscall(['powershell', '-Command', f'Get-PhysicalDisk | Select-Object DeviceID, MediaType | Where-Object {{ $_.DeviceID -eq {drive.Index} }}'])
 
@@ -94,14 +93,21 @@ class Disks:
             result = self._syscall(['lsblk', '-J', '-b', '-o', 'NAME,FSSIZE,FSAVAIL,FSUSED', f'/dev/{drive_id}'])
             device = json.loads(result)
             device = bunchify(device)
-            device = device.blockdevices[0]
 
-            physical_drives[drive_id].usage = Bunch()
-            physical_drives[drive_id].usage.total = 0
-            physical_drives[drive_id].usage.free = 0
-            physical_drives[drive_id].usage.used = 0
+            if device.blockdevices:
+                physical_drives[drive_id].usage = Bunch()
+                physical_drives[drive_id].usage.total = 0
+                physical_drives[drive_id].usage.free = 0
+                physical_drives[drive_id].usage.used = 0
 
-            recursive_usage(device)
+                device = device.blockdevices[0]
+                recursive_usage(device)
+
+            else:
+                physical_drives[drive_id].usage = Bunch()
+                physical_drives[drive_id].usage.total = None
+                physical_drives[drive_id].usage.free = None
+                physical_drives[drive_id].usage.used = None
 
             if not drive.rota:
                 physical_drives[drive_id].mediatype = 'SSD'
@@ -155,9 +161,7 @@ class Disks:
             physical_partitions[partition].usage.used = 0
 
             if partition_plist.get('FreeSpace'):
-                physical_partitions[partition].usage.used = physical_partitions[
-                                                                partition].usage.total - partition_plist.get(
-                    'FreeSpace')
+                physical_partitions[partition].usage.used = physical_partitions[partition].usage.total - partition_plist.get('FreeSpace')
 
             else:
                 for container in containers:
@@ -216,8 +220,7 @@ class DisksProfiler:
 
     def _get_usage(self) -> Bunch:
         usage: dict = psutil.disk_io_counters(perdisk=True)
-        usage: dict = {key: {'read_bytes': value.read_bytes, 'write_bytes': value.write_bytes} for key, value in
-                       usage.items() if key in self.disks}
+        usage: dict = {key: {'read_bytes': value.read_bytes, 'write_bytes': value.write_bytes} for key, value in usage.items() if key in self.disks}
         usage: dict = dict(sorted(usage.items()))
         return bunchify(usage)
 
