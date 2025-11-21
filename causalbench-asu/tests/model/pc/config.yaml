@@ -3,7 +3,9 @@ name: pc
 source: GitHub
 url: https://github.com/huawei-noah/trustworthyAI/blob/master/gcastle/castle/algorithms/pc/pc.py
 description: "PC algorithm: A classic causal discovery algorithm based on conditional independence tests."
-task: discovery.static
+task:
+    id: 1
+    version: 1
 path: pc.py
 hyperparameters:
     variant:

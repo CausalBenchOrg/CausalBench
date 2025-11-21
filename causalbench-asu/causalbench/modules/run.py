@@ -39,7 +39,7 @@ class Run(Module):
     def __str__(self):
         string = '=' * 80 + '\n'
 
-        string += f'Task: {self.task}' + '\n'
+        string += f'Task: {self.task.name}' + '\n'
 
         for result in self.results:
             string += '-' * 80 + '\n'

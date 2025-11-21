@@ -23,6 +23,10 @@ class Context(Module):
     def __getstate__(self):
         state = super().__getstate__()
 
+        if 'task' in state:
+            if 'object' in state.task:
+                del state.task.object
+
         if 'datasets' in state:
             for dataset in state.datasets:
                 if 'object' in dataset:
@@ -52,6 +56,10 @@ class Context(Module):
                             'downloaded_context.zip')
 
     def save(self, state, public: bool = False) -> bool:
+        if state.task.id is None:
+            logging.error('Cannot publish context as it contains unpublished task')
+            return False
+    
         for dataset in state.datasets:
             if dataset.id is None:
                 logging.error('Cannot publish context as it contains unpublished dataset')
@@ -82,7 +90,8 @@ class Context(Module):
         start_time = time.time_ns()
 
         # load the task
-        task: Task = Task(module_id=self.task)
+        if 'object' not in self.task:
+            self.task.object = Task(module_id=self.task.id, version=self.task.version)
 
         # load the datasets
         datasets = []
@@ -109,7 +118,7 @@ class Context(Module):
         scenarios = []
         for dataset in datasets:
             for model in models:
-                scenario = Scenario(task, dataset, model, metrics)
+                scenario = Scenario(self.task.object, dataset, model, metrics)
                 scenarios.append(scenario)
 
         # execute the scenarios
@@ -130,7 +139,10 @@ class Context(Module):
         run.context.name = self.name
 
         # task
-        run.task = self.task
+        run.task = Bunch()
+        run.task.id = self.task.object.module_id
+        run.task.version = self.task.object.version
+        run.task.name = self.task.object.name
 
         # results
         run.results = results
@@ -167,7 +179,15 @@ class Context(Module):
         # metadata
         self.name = arguments.name
         self.description = arguments.description
-        self.task = arguments.task
+
+        # task
+        self.task = Bunch()
+        if isinstance(arguments.task, Task):
+            self.task.id = arguments.task.module_id
+            self.task.version = arguments.task.version
+            self.task.object = arguments.task
+        else:
+            raise ValueError('Invalid task instance')
 
         # convert datasets to config format
         self.datasets = []

@@ -1,10 +1,44 @@
-from causalbench.modules import Dataset, Metric, Model, Context, Run
+from causalbench.modules import Dataset, Metric, Model, Context, Run, Task
 
 def main():
-    context: Context = Context(module_id=19, version=1)
+    pass
 
-    run: Run = context.execute()
-    print(run)
+    task: Task = Task(module_id=1, version=1)
+    # print(task.name)
+
+    # dataset: Dataset = Dataset(zip_file="C:\\Users\\prata\\Files\\Git\\CausalBench\\causalbench-asu\\tests\\data\\abalone.zip")
+    # dataset.publish()
+
+    dataset: Dataset = Dataset(module_id=1, version=1)
+    # print(dataset.name)
+
+    # task: Task = Task(zip_file="C:\\Users\\prata\\Files\\Git\\CausalBench\\causalbench-asu\\tests\\task\\discovery.static.zip")
+    # task.publish()
+
+    # model: Model = Model(zip_file="C:\\Users\\prata\\Files\\Git\\CausalBench\\causalbench-asu\\tests\\model\\pc.zip")
+    # model.publish()
+
+    model: Model = Model(module_id=1, version=1)
+    # print(model.name)
+
+    # metric: Metric = Metric(zip_file="C:\\Users\\prata\\Files\\Git\\CausalBench\\causalbench-asu\\tests\\metric\\accuracy_static.zip")
+    # metric.publish()
+
+    metric: Metric = Metric(module_id=1, version=1)
+    # print(metric.name)
+
+    context: Context = Context.create(
+        name='Context1',
+        description='Test static context',
+        task=task,
+        datasets=[(dataset, {'data': 'file1', 'ground_truth': 'file2'})],
+        models=[(model, {})],
+        metrics=[(metric, {})])
+    
+    context.publish()
+    
+    # run: Run = context.execute()
+    # print(run)
 
 
 if __name__ == '__main__':

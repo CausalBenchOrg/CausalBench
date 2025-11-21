@@ -4,8 +4,9 @@ from importlib.util import spec_from_file_location, module_from_spec
 
 from bunch_py3 import Bunch
 
+from causalbench.commons.utils import package_module
 from causalbench.modules.module import Module
-from causalbench.services.requests import fetch_module
+from causalbench.services.requests import save_module, fetch_module
 
 
 class AbstractTask(ABC):
@@ -29,8 +30,8 @@ class AbstractTask(ABC):
 
 class Task(Module):
 
-    def __init__(self, module_id: str = None, zip_file: str = None):
-        super().__init__(module_id, 0, zip_file)
+    def __init__(self, module_id: int = None, version: int = None, zip_file: str = None):
+        super().__init__(module_id, version, zip_file)
 
     def instantiate(self, arguments: Bunch):
         # TODO: Create the structure of the new instance
@@ -48,8 +49,15 @@ class Task(Module):
                             'downloaded_task.zip')
 
     def save(self, state, public: bool) -> bool:
-        # TODO: Save the task
-        pass
+        zip_file = package_module(state, self.package_path)
+        self.module_id, self.version = save_module(self.type,
+                                                   self.module_id,
+                                                   self.version,
+                                                   public,
+                                                   zip_file,
+                                                   'tasks',
+                                                   'task.zip')
+        return self.module_id is not None
 
     def load(self) -> AbstractTask:
         # form the proper file path

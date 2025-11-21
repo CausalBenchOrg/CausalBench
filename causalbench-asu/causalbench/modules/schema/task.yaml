@@ -17,6 +17,12 @@ properties:
         const: task
     name:
         type: string
+    source:
+        type: string
+    url:
+        type: string
+    description:
+        type: string
     path:
         type: string
     class_name:
@@ -25,5 +31,8 @@ required:
     - causalbench
     - type
     - name
+    - source
+    - url
+    - description
     - path
     - class_name

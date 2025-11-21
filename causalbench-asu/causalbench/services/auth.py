@@ -11,6 +11,10 @@ from causalbench.commons.utils import causal_bench_path, causalbench_version
 from causalbench.commons.password import prompt_password
 from requests import RequestException
 
+
+api_endpoint = 'https://causalbench.org/api_beta'
+
+
 __access_token = None
 
 def get_access_token() -> str | None:
@@ -52,7 +56,7 @@ def init_auth() -> str | None:
 
 
 def authenticate(config) -> str | None:
-    login_url = "https://causalbench.org/api/authenticate/login"
+    login_url = f"{api_endpoint}/authenticate/login"
 
     if 'email' in config:
         email = config['email']
