@@ -40,12 +40,12 @@ class Scenario:
         #                 data_object.update_index(self.dataset[0].files[file])
 
         # check model compatibility
-        if self.model[0].task != self.task.module_id:
+        if self.model[0].task.id != self.task.module_id or self.model[0].task.version != self.task.version:
             raise TypeError(f'Model "{self.model[0].name}" not compatible with task "{self.task.module_id}"')
 
         # check metric compatibility
         for metric in self.metrics:
-            if metric[0].task != self.task.module_id:
+            if metric[0].task.id != self.task.module_id or metric[0].task.version != self.task.version:
                 raise TypeError(f'Metric "{metric[0].name}" not compatible with task "{self.task.module_id}"')
 
         # map model parameters

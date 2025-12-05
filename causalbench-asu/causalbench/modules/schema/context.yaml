@@ -20,11 +20,15 @@ properties:
     description:
         type: string
     task:
-        enum:
-            - discovery.static
-            - discovery.temporal
-            - discovery.spatiotemporal
-            - classification
+        type: object
+        properties:
+            id:
+                type: integer
+            version:
+                type: integer
+        required:
+            - id
+            - version
     datasets:
         type: array
         items:
