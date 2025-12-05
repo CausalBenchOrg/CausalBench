@@ -17,7 +17,7 @@ from bunch_py3 import bunchify, Bunch
 
 def causalbench_version() -> Bunch:
     ver = Bunch()
-    ver.major, ver.minor, ver.build = re.split(r'\.|(?<=\d)(?=\D)', version('causalbench-asu'))
+    ver.major, ver.minor, ver.build = version('causalbench-asu').split('.')
     return ver
 
 
