@@ -15,9 +15,9 @@ from causalbench.commons.password import prompt_password
 
 __access_token = None
 
-def get_access_token() -> str | None:
+def get_access_token(refresh=False) -> str | None:
     global __access_token
-    if __access_token is None or is_token_expired(__access_token):
+    if __access_token is None or refresh or is_token_expired(__access_token):
         __access_token = init_auth()
     return __access_token
 
