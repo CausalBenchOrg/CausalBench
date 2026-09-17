@@ -10,9 +10,9 @@ from causalbench.commons.constants import API_ENDPOINT
 from causalbench.services.auth import get_access_token
 
 
-def _get_auth_headers(refresh=False):
+def _get_auth_headers(force_login=False):
     return {
-        'Authorization': f'Bearer {get_access_token(refresh=refresh)}'
+        'Authorization': f'Bearer {get_access_token(force_login=force_login)}'
     }
 
 
@@ -22,7 +22,7 @@ def _send_authenticated_request(send_request):
     if response.status_code != 401:
         return response
 
-    return send_request(_get_auth_headers(refresh=True))
+    return send_request(_get_auth_headers(force_login=True))
 
 
 def save_module(module_type, module_id, version, public, input_file, api_base, default_output_file):
